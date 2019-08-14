@@ -14,7 +14,7 @@ to wherever you please.
 --------------------------------------------------------------------
 COMPILATION AND RUNNING
 
-To compile and run the program navigate to the MessagingSoftware-master\Message directory and run the command "javac -d . *.java",
+To compile and run the program navigate to the MessagingSoftware-master\Message in console directory and run the command "javac -d . *.java",
 then to run the program run the command "java -cp . Message.Main". A few items will be printed to the console and the GUI should 
 then draw itself.
 --------------------------------------------------------------------
