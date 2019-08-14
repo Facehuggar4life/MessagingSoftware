@@ -1,2 +1,2 @@
-# GroupProject
-Some simple messaging software some to-be sophmores are working on
+# Messaging Software
+Some simple messaging software 
