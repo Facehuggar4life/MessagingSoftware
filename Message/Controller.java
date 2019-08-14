@@ -1,15 +1,14 @@
 package Message;
 
 import javax.swing.*;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
 
 public class Controller {
-    View myView;
-    Model myModel;
-    Networking net = new Networking(this);
-    ConversationIndex conversations = new ConversationIndex();
+    private View myView;
+    private Model myModel;
+    private Networking net = new Networking(this);
+    private ConversationIndex conversations = new ConversationIndex();
     private JComboBox<String> contacts;
     private JButton sendMessage;
     private JButton addContact;
@@ -17,7 +16,7 @@ public class Controller {
     private JButton reconnect;
     private JTextField userMessage;
 
-    public Controller(View view, Model mod){
+     public Controller(View view, Model mod){
         this.myModel = mod;
         this.myView = view;
         contacts = myView.contactSelection;
@@ -38,7 +37,7 @@ public class Controller {
 
     //UI input
 
-    public void promptUserForIncoming(String IP){//Makes a window to add a contact where the IP value is already set and should not be changed
+     public void promptUserForIncoming(String IP){//Makes a window to add a contact where the IP value is already set and should not be changed
         JTextField contactName = new JTextField();
         JTextField IPAddress = new JTextField();
         IPAddress.setEditable(false);
@@ -51,7 +50,7 @@ public class Controller {
         }
     }
 
-    public void promptUser(){//Makes a window to add a contact
+    private void promptUser(){//Makes a window to add a contact
         JTextField contactName = new JTextField();
         JTextField IPAddress = new JTextField();
         Object[] UI = {"Name: ", contactName,
@@ -64,7 +63,7 @@ public class Controller {
 
     //contact management
 
-    public void addContact(String userName, String IP){
+    private void addContact(String userName, String IP){
         Conversation newConversation = new Conversation(userName, IP);
         System.out.println(userName + "END");
         System.out.println(IP + "END");
@@ -80,14 +79,15 @@ public class Controller {
         }
     }
 
-    public void removeContact(){
+    private void removeContact(){
         if(contacts.getSelectedItem() != null) {
             contacts.removeItemAt(contacts.getSelectedIndex());
             conversations = myModel.removeCurrentConversation(conversations);
+            updateMessages();
         }
     }
 
-    public void setContact(){
+    private void setContact(){
         if(contacts.getSelectedItem()!=null){
             int Index = contacts.getSelectedIndex();
             Conversation conversation = conversations.Conversations.get(contacts.getItemAt(Index));
@@ -99,7 +99,7 @@ public class Controller {
         }
     }
 
-    public void reconnectToServer(){
+    private void reconnectToServer(){
         System.out.println("Reconnect");
         if(myModel.CurrentConversation == null){
             JOptionPane.showMessageDialog(null,  "Choose a conversation before trying to reconnect","Cannot reconnect", JOptionPane.ERROR_MESSAGE);
@@ -111,7 +111,7 @@ public class Controller {
 
     //Message handling
 
-    public void sendMessage(){
+    private void sendMessage(){
         if(myModel.CurrentConversation == null){
             JOptionPane.showMessageDialog(null,  "Choose a conversation before trying to send a message","Cannot send", JOptionPane.ERROR_MESSAGE);
         }
@@ -139,26 +139,24 @@ public class Controller {
 
     //Formatting
 
-    public void updateMessages(){
-        try {
+    private void updateMessages(){
+        if(myModel.CurrentConversation==null) {
+            myView.messageDisplay.setText("");//Sets message display window to empty if there is no current conversation
+        }
+        else {
             myView.messageDisplay.setText(generateMessageString(myModel.CurrentConversation.Messages));
             //Sets messageDisplay text to correctly formatted text derived from Messages ArrayList
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
         }
     }
 
-    public Message generateMessage(String message, String IP){
+    private Message generateMessage(String message, String IP){//Simplifies the process of getting the timestamp for the Message object
         Date timeStamper = new Date();
         String timeStamp = timeStamper.toString();
-        System.out.println(IP);
-        System.out.println(message);
-        System.out.println(timeStamp);
         Message incomingMessage = new Message(message, IP, timeStamp);
         return incomingMessage;
     }
 
-    private String generateMessageString(ArrayList<Message> messageHistory) throws UnknownHostException {
+    private String generateMessageString(ArrayList<Message> messageHistory) {
         String MessageString = "";
         for(Message m: messageHistory){//Loops through all messages in the current Conversation and Formats the conversation before adding it to a string
             if((m.IPOrigin).equals(net.getUserIP())){

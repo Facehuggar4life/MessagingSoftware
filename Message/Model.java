@@ -1,7 +1,5 @@
 package Message;
 
-import java.util.Map;
-
 public class Model {
     Conversation CurrentConversation;
     public ConversationIndex setCurrentConversation(ConversationIndex conversations, Conversation con){
@@ -11,11 +9,8 @@ public class Model {
     }
 
     public ConversationIndex removeCurrentConversation(ConversationIndex conversations){
-        conversations.Conversations.remove(CurrentConversation.ConversationName);
-        for(Map.Entry<String, Conversation> entry : conversations.Conversations.entrySet()){
-            System.out.println(entry);
-        }
-        CurrentConversation = null;
+        conversations.Conversations.remove(CurrentConversation.ConversationName);//Gets rid of current conversation in conversation.Conversations Hashmap
+        CurrentConversation = null;//Sets the current conversation to null
         return conversations;
     }
 }

@@ -16,16 +16,16 @@ public class Networking extends Thread{
     Controller con;
     public Networking(Controller con)  {
         try {
-            serverSocket = new ServerSocket(1, 0);
+            serverSocket = new ServerSocket(1, 0);//makes server socket
         } catch (IOException e) {
             e.printStackTrace();
         }
         this.con = con;
-        this.start();//starts the server thread
+        this.start();//starts the server accept thread
     }
 
     public void connect(String IP) {
-        if(clientSocket!=null){//closes the previous socket if the current one is not null
+        if(clientSocket!=null){//closes the previous connection if the current socket is not null
             try {
                 clientSocket.close();
             } catch (IOException e) {
@@ -54,7 +54,7 @@ public class Networking extends Thread{
 
 
     public void sendMessage(String message){
-        clientOut.println(message);//Sends stream to the output stream
+        clientOut.println(message);//Sends string to the output stream
     }
 
     public String getUserIP(){
@@ -68,7 +68,6 @@ public class Networking extends Thread{
 
     @Override
     public void run() {//Thread that runs to accept incoming connections and that feeds input to the general program
-        String input;
         super.run();
         while(true) {
             try {
@@ -79,28 +78,21 @@ public class Networking extends Thread{
             }
             String inIP = incomingSocket.getInetAddress().toString();//gets IP of incoming connection
             Boolean isCurrentConnection = false;
-            if(clientSocket!=null) {
+            try {
                 String currentConnectedIP = clientSocket.getInetAddress().toString();
                 isCurrentConnection = currentConnectedIP.equals(inIP);
             }
-            System.out.println("A");
+            catch(NullPointerException e){
+                e.printStackTrace();
+            }
             if(!inIP.equals("/127.0.0.1")&&!isCurrentConnection) {//if to prevent user from having to make new contact if connecting to localhost
-                //or if the incoming connection is their current conversation
-                System.out.println("Debug");
+                //or if the incoming connection is from the client they've just connected to
                 int option = JOptionPane.showConfirmDialog(null, "You have received an incoming connection from " +inIP +". Would you like to accept?", "Incoming Connection", JOptionPane.YES_NO_OPTION);
                 //Prompts user to accept or decline connection then acts accordingly
                 if (option == JOptionPane.OK_OPTION) {
                     con.promptUserForIncoming(inIP.substring(1));//removes initial '/' before prompting user to add contacts name
-                    try {
-                        while ((input = serverIn.readLine()) != null) {
-                            Thread.sleep(10);
-                            con.receiveMessage(input, incomingSocket.getInetAddress().toString());
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    networkInputLoop();//While connected checks for incoming messages
+                    JOptionPane.showMessageDialog(null, "You have been disconnected from " + inIP);
                 } else if (option == JOptionPane.NO_OPTION) {
                     try {
                         incomingSocket.close();//Closes the connection if the user denies the connection
@@ -110,21 +102,22 @@ public class Networking extends Thread{
                     JOptionPane.showMessageDialog(null, "The connection was successfully closed");
                 }
             }
-            else{//localhost case wherein the user's input is echo'd or the case where the connection is current
-                System.out.println("Debug1");
-                try {
-                    while ((input = serverIn.readLine()) != null) {
-                        System.out.println("Here");
-                        Thread.sleep(100);//Adds delay to ensure c.myModel.CurrentConversation.Messages ArrayList isn't written to concurrently
-                        System.out.println("And here");
-                        con.receiveMessage(input, incomingSocket.getInetAddress().toString());
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            else{//case for localhost or if the incoming connection is a connection the user initiated
+                networkInputLoop();
+                JOptionPane.showMessageDialog(null, "You have been disconnected from " + inIP);
             }
+        }
+    }
+
+    private void networkInputLoop(){
+        String input;
+        try {
+            while ((input = serverIn.readLine()) != null) {
+                Thread.sleep(100);//Adds delay to ensure c.myModel.CurrentConversation.Messages ArrayList isn't written to concurrently
+                con.receiveMessage(input, incomingSocket.getInetAddress().toString());
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
         }
     }
 }

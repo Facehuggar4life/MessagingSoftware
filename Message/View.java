@@ -91,7 +91,7 @@ public class View {
         frame.setVisible(true);
     }
 
-    private void setUIManager(String lAndFName){
+    private void setUIManager(String lAndFName){//Sets look and feel from string
         try {
             for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                 if (lAndFName.equals(info.getName())) {
@@ -102,7 +102,7 @@ public class View {
             }
             System.out.println("The Look and Feel " + lAndFName + " could not be found. Using default");
         } catch (Exception e) {
-            // If Nimbus is not available, you can set the GUI to another look and feel.
+            e.printStackTrace();
         }
     }
 
